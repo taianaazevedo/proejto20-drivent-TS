@@ -24,12 +24,16 @@ async function getTicketFromUser(userId: number): Promise<Ticket & { TicketType:
   });
 }
 
-async function postTicket(ticketTypeId: number, enrollmentId: number): Promise<Ticket & { TicketType: TicketType }> {
+async function postTicket(
+  ticketTypeId: number,
+  enrollmentId: number,
+  status: TicketStatus,
+): Promise<Ticket & { TicketType: TicketType }> {
   return await prisma.ticket.create({
     data: {
       ticketTypeId,
       enrollmentId,
-      status: TicketStatus.RESERVED,
+      status,
     },
     include: {
       TicketType: true,

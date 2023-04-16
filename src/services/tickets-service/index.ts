@@ -19,11 +19,12 @@ async function getTicketFromUser(userId: number): Promise<Ticket & { TicketType:
 }
 
 async function postTicket(ticketTypeId: number, userId: number): Promise<Ticket & { TicketType: TicketType }> {
+  const status: TicketStatus = 'RESERVED';
   const userEnrollment = await ticketsRepository.getUserByEnrollment(userId);
 
   if (!userEnrollment) throw notFoundError();
 
-  const result = await ticketsRepository.postTicket(ticketTypeId, userEnrollment.id);
+  const result = await ticketsRepository.postTicket(ticketTypeId, userEnrollment.id, status);
 
   return result;
 }
