@@ -1,35 +1,45 @@
-import { Payment, TicketStatus } from '@prisma/client';
+import { notFoundError, unauthorizedError } from '@/errors';
+import { CardPaymentParams, PaymentParams } from '@/protocols';
+import enrollmentRepository from '@/repositories/enrollment-repository';
 import paymentsRepository from '@/repositories/payments-repository';
-import { notFoundError, requestError, unauthorizedError } from '@/errors';
-import { PaymentBody } from '@/protocols';
+import ticketsRepository from '@/repositories/tickets-repository';
 
-async function getPayment(userId: number, ticketId: number): Promise<Payment> {
-  const ticketExist = await paymentsRepository.getTicketById(ticketId);
+async function verifyTicketAndEnrollment(ticketId: number, userId: number) {
+  const ticket = await ticketsRepository.findTickeyById(ticketId);
+  if (!ticket) throw notFoundError();
 
-  if (!ticketExist) throw notFoundError();
+  const enrollment = await enrollmentRepository.findById(ticket.enrollmentId);
+  if (!enrollment) throw notFoundError();
 
-  if (userId !== ticketExist.Enrollment.userId) throw unauthorizedError();
-
-  return await paymentsRepository.getPayment(ticketId);
+  if (enrollment.userId !== userId) throw unauthorizedError();
 }
 
-async function postPayment(data: PaymentBody, userId: number): Promise<Payment> {
-  const status: TicketStatus = 'PAID';
+async function getPaymentByTicketId(userId: number, ticketId: number) {
+  await verifyTicketAndEnrollment(ticketId, userId);
 
-  const paymentExist = await paymentsRepository.getTicketById(data.ticketId);
+  const payment = await paymentsRepository.findPaymentByTicketId(ticketId);
+  if (!payment) throw notFoundError();
 
-  if (!paymentExist) throw notFoundError();
-
-  if (userId !== paymentExist.Enrollment.userId) throw unauthorizedError();
-
-  await paymentsRepository.updateTicket(status, paymentExist.id);
-
-  return await paymentsRepository.postPayment(data, paymentExist.TicketType.price);
+  return payment;
 }
 
-const paymentsService = {
-  getPayment,
-  postPayment,
-};
+async function paymentProcess(ticketId: number, userId: number, cardData: CardPaymentParams) {
+  await verifyTicketAndEnrollment(ticketId, userId);
 
-export default paymentsService;
+  const ticket = await ticketsRepository.findTickeWithTypeById(ticketId);
+
+  const paymentData: PaymentParams = {
+    ticketId,
+    value: ticket.TicketType.price,
+    cardIssuer: cardData.issuer,
+    cardLastDigits: cardData.number.toString().slice(-4),
+  };
+
+  const payment = await paymentsRepository.createPayment(ticketId, paymentData);
+
+  await ticketsRepository.ticketProcessPayment(ticketId);
+
+  return payment;
+}
+
+export default { getPaymentByTicketId, paymentProcess };
