@@ -3,28 +3,6 @@ import hotelsRepository from '@/repositories/hotels-repository';
 import { notFoundError, paymentRequiredError } from '@/errors';
 import paymentsRepository from '@/repositories/payments-repository';
 
-async function verifyUserTicket(userId: number) {
-  const ticket = await ticketService.getTicketByUserId(userId);
-
-  if (!ticket) throw notFoundError();
-
-  return ticket;
-}
-
-async function verifyPaymentFromUser(ticketId: number) {
-  const payment = await paymentsRepository.getPaymentAndTicketByTicketId(ticketId);
-
-  if (!payment) throw notFoundError();
-
-  if (payment.Ticket.status === 'RESERVED') throw paymentRequiredError();
-
-  if (payment.Ticket.TicketType.isRemote === true) throw paymentRequiredError();
-
-  if (payment.Ticket.TicketType.includesHotel === false) throw paymentRequiredError();
-
-  return payment;
-}
-
 async function getHotels(userId: number) {
   const ticket = await verifyUserTicket(userId);
 
@@ -51,6 +29,27 @@ async function getHotelWithRoom(hotelId: string, userId: number) {
   return hotelWithRoom;
 }
 
+async function verifyUserTicket(userId: number) {
+  const ticket = await ticketService.getTicketByUserId(userId);
+
+  if (!ticket) throw notFoundError();
+
+  return ticket;
+}
+
+async function verifyPaymentFromUser(ticketId: number) {
+  const payment = await paymentsRepository.getPaymentAndTicketByTicketId(ticketId);
+
+  if (!payment) throw notFoundError();
+
+  if (payment.Ticket.status === 'RESERVED') throw paymentRequiredError();
+
+  if (payment.Ticket.TicketType.isRemote === true) throw paymentRequiredError();
+
+  if (payment.Ticket.TicketType.includesHotel === false) throw paymentRequiredError();
+
+  return payment;
+}
 const hotelsService = {
   getHotels,
   getHotelWithRoom,
