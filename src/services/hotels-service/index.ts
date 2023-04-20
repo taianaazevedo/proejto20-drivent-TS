@@ -4,7 +4,7 @@ import { notFoundError, paymentRequiredError } from '@/errors';
 import enrollmentRepository from '@/repositories/enrollment-repository';
 import ticketsRepository from '@/repositories/tickets-repository';
 
-async function getHotels(userId: number): Promise<Hotel[]> {
+async function verifyTicketAndPaymentFromUser(userId: number) {
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
 
   if (!enrollment) throw notFoundError();
@@ -18,6 +18,12 @@ async function getHotels(userId: number): Promise<Hotel[]> {
   if (ticket.TicketType.includesHotel === false) throw paymentRequiredError();
 
   if (ticket.TicketType.isRemote === true) throw paymentRequiredError();
+
+  return [enrollment, ticket];
+}
+
+async function getHotels(userId: number): Promise<Hotel[]> {
+  await verifyTicketAndPaymentFromUser(userId);
 
   const hotels = await hotelsRepository.getHotels();
 
@@ -29,19 +35,7 @@ async function getHotels(userId: number): Promise<Hotel[]> {
 async function getHotelWithRoom(hotelId: string, userId: number) {
   const hotel_id = Number(hotelId);
 
-  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-
-  if (!enrollment) throw notFoundError();
-
-  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
-
-  if (!ticket) throw notFoundError();
-
-  if (ticket.status !== 'PAID') throw paymentRequiredError();
-
-  if (ticket.TicketType.includesHotel === false) throw paymentRequiredError();
-
-  if (ticket.TicketType.isRemote === true) throw paymentRequiredError();
+  await verifyTicketAndPaymentFromUser(userId);
 
   const hotelWithRoom = await hotelsRepository.getHotelWithRoom(hotel_id);
 
