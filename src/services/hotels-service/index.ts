@@ -2,15 +2,9 @@ import ticketService from '../tickets-service';
 import hotelsRepository from '@/repositories/hotels-repository';
 import { notFoundError, paymentRequiredError } from '@/errors';
 import paymentsRepository from '@/repositories/payments-repository';
-import enrollmentRepository from '@/repositories/enrollment-repository';
-import ticketsRepository from '@/repositories/tickets-repository';
 
 async function verifyUserInfo(userId: number) {
-  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-
-  if (!enrollment) throw notFoundError();
-
-  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
+  const ticket = await ticketService.getTicketByUserId(userId);
 
   if (!ticket) throw notFoundError();
 
@@ -18,13 +12,13 @@ async function verifyUserInfo(userId: number) {
 
   if (!payment) throw notFoundError();
 
-  if (payment.Ticket.status !== 'PAID') throw paymentRequiredError();
+  if (payment.Ticket.status === 'RESERVED') throw paymentRequiredError();
 
   if (payment.Ticket.TicketType.isRemote === true) throw paymentRequiredError();
 
   if (payment.Ticket.TicketType.includesHotel === false) throw paymentRequiredError();
 
-  return ticket;
+  return payment;
 }
 
 async function getHotels(userId: number) {
