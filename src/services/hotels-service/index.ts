@@ -13,11 +13,8 @@ async function verifyTicketAndPaymentFromUser(userId: number) {
 
   if (!ticket) throw notFoundError();
 
-  if (ticket.status !== 'PAID') throw paymentRequiredError();
-
-  if (ticket.TicketType.includesHotel === false) throw paymentRequiredError();
-
-  if (ticket.TicketType.isRemote === true) throw paymentRequiredError();
+  if (ticket.status !== 'PAID' || ticket.TicketType.includesHotel === false || ticket.TicketType.isRemote === true)
+    throw paymentRequiredError();
 
   return [enrollment, ticket];
 }
