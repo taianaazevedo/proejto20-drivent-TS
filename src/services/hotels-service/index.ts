@@ -3,12 +3,16 @@ import hotelsRepository from '@/repositories/hotels-repository';
 import { notFoundError, paymentRequiredError } from '@/errors';
 import paymentsRepository from '@/repositories/payments-repository';
 
-async function verifyUserInfo(userId: number) {
+async function verifyUserTicket(userId: number) {
   const ticket = await ticketService.getTicketByUserId(userId);
 
   if (!ticket) throw notFoundError();
 
-  const payment = await paymentsRepository.getPaymentAndTicketByTicketId(ticket.id);
+  return ticket;
+}
+
+async function verifyPaymentFromUser(ticketId: number) {
+  const payment = await paymentsRepository.getPaymentAndTicketByTicketId(ticketId);
 
   if (!payment) throw notFoundError();
 
@@ -22,7 +26,9 @@ async function verifyUserInfo(userId: number) {
 }
 
 async function getHotels(userId: number) {
-  await verifyUserInfo(userId);
+  const ticket = await verifyUserTicket(userId);
+
+  await verifyPaymentFromUser(ticket.id);
 
   const hotels = await hotelsRepository.getHotels();
 
@@ -34,7 +40,9 @@ async function getHotels(userId: number) {
 async function getHotelWithRoom(hotelId: string, userId: number) {
   const hotel_id = Number(hotelId);
 
-  await verifyUserInfo(userId);
+  const ticket = await verifyUserTicket(userId);
+
+  await verifyPaymentFromUser(ticket.id);
 
   const hotelWithRoom = await hotelsRepository.getHotelWithRoom(hotel_id);
 
