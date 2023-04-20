@@ -2,13 +2,19 @@ import ticketService from '../tickets-service';
 import hotelsRepository from '@/repositories/hotels-repository';
 import { notFoundError, paymentRequiredError } from '@/errors';
 import paymentsRepository from '@/repositories/payments-repository';
+import enrollmentRepository from '@/repositories/enrollment-repository';
+import ticketsRepository from '@/repositories/tickets-repository';
 
 async function verifyUserInfo(userId: number) {
-  const ticketFromUser = await ticketService.getTicketByUserId(userId);
+  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
 
-  if (!ticketFromUser) throw notFoundError();
+  if (!enrollment) throw notFoundError();
 
-  const payment = await paymentsRepository.getPaymentAndTicketByTicketId(ticketFromUser.id);
+  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
+
+  if (!ticket) throw notFoundError();
+
+  const payment = await paymentsRepository.getPaymentAndTicketByTicketId(ticket.id);
 
   if (!payment) throw notFoundError();
 
@@ -18,7 +24,7 @@ async function verifyUserInfo(userId: number) {
 
   if (payment.Ticket.TicketType.includesHotel === false) throw paymentRequiredError();
 
-  return ticketFromUser;
+  return ticket;
 }
 
 async function getHotels(userId: number) {
@@ -37,6 +43,8 @@ async function getHotelWithRoom(hotelId: string, userId: number) {
   await verifyUserInfo(userId);
 
   const hotelWithRoom = await hotelsRepository.getHotelWithRoom(hotel_id);
+
+  if (hotelWithRoom.Rooms.length === 0) throw notFoundError();
 
   return hotelWithRoom;
 }
