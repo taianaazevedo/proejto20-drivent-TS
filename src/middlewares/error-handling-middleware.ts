@@ -38,11 +38,17 @@ export function handleApplicationErrors(
     });
   }
 
+  if (err.name === 'PaymentRequiredError') {
+    return res.status(httpStatus.PAYMENT_REQUIRED).send({
+      message: err.message,
+    });
+  }
+
   /* eslint-disable-next-line no-console */
   console.error(err.name);
   res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
     error: 'InternalServerError',
     message: 'Internal Server Error',
   });
-  next();
+  _next();
 }
