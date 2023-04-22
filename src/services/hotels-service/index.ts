@@ -1,4 +1,4 @@
-import { Hotel } from '@prisma/client';
+import { Hotel, Room } from '@prisma/client';
 import hotelsRepository from '@/repositories/hotels-repository';
 import { notFoundError, paymentRequiredError } from '@/errors';
 import enrollmentRepository from '@/repositories/enrollment-repository';
@@ -29,7 +29,7 @@ async function getHotels(userId: number): Promise<Hotel[]> {
   return hotels;
 }
 
-async function getHotelWithRoom(hotelId: string, userId: number) {
+async function getHotelWithRoom(hotelId: string, userId: number): Promise<Hotel & { Rooms: Room[] }> {
   const hotel_id = Number(hotelId);
 
   await verifyTicketAndPaymentFromUser(userId);
