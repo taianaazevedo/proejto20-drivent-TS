@@ -1,8 +1,6 @@
 import hotelsService from '../hotels-service';
 import { cannotBookingError, notFoundError } from '@/errors';
 import bookingRepository from '@/repositories/booking-repository';
-import enrollmentRepository from '@/repositories/enrollment-repository';
-import ticketsRepository from '@/repositories/tickets-repository';
 
 async function verifyAvailabilityFromRooms(roomId: number) {
   const room = await bookingRepository.findRoomById(roomId);
@@ -23,16 +21,7 @@ async function getBooking(userId: number) {
 }
 
 async function postBooking(userId: number, roomId: number) {
-  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-
-  if (!enrollment) throw notFoundError();
-
-  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
-
-  if (!ticket) throw notFoundError();
-
-  if (ticket.status !== 'PAID' || ticket.TicketType.includesHotel === false || ticket.TicketType.isRemote === true)
-    throw cannotBookingError();
+  await hotelsService.verifyTicketAndPaymentFromUser(userId);
 
   const room = await verifyAvailabilityFromRooms(roomId);
 
