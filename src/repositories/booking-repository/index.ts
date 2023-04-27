@@ -1,6 +1,7 @@
+import { Room } from '@prisma/client';
 import { prisma } from '@/config';
 
-async function findRoomById(roomId: number) {
+async function findRoomById(roomId: number): Promise<Room> {
   return await prisma.room.findFirst({
     where: {
       id: roomId,
@@ -8,7 +9,7 @@ async function findRoomById(roomId: number) {
   });
 }
 
-async function getBooking(userId: number) {
+async function getBooking(userId: number): Promise<{ Room: Room; id: number }> {
   return await prisma.booking.findFirst({
     where: {
       userId,

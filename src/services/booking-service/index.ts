@@ -39,15 +39,15 @@ async function updateBooking(userId: number, bookingId: string, roomId: number) 
 
   if (!userBooking) throw cannotBookingError();
 
-  const updateCapacityFromOldRoom = userBooking.Room.capacity + 1;
-
-  await bookingRepository.updateCapacityFromRoom(userBooking.Room.id, updateCapacityFromOldRoom);
-
   const room = await verifyAvailabilityFromRooms(roomId);
+
+  const updateCapacityFromOldRoom = userBooking.Room.capacity + 1;
 
   const updateCapacityFromNewRoom = room.capacity - 1;
 
   await bookingRepository.updateCapacityFromRoom(roomId, updateCapacityFromNewRoom);
+
+  await bookingRepository.updateCapacityFromRoom(userBooking.Room.id, updateCapacityFromOldRoom);
 
   return await bookingRepository.updateBooking(roomId, booking_id, userId);
 }
