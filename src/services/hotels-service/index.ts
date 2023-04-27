@@ -44,6 +44,7 @@ async function getHotelWithRoom(hotelId: string, userId: number): Promise<Hotel 
 const hotelsService = {
   getHotels,
   getHotelWithRoom,
+  verifyTicketAndPaymentFromUser,
 };
 
 export default hotelsService;
