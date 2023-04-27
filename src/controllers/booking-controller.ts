@@ -8,6 +8,8 @@ export async function getBooking(req: AuthenticatedRequest, res: Response, next:
   try {
     const booking = await bookingService.getBooking(userId);
 
+    console.log(booking);
+
     return res.status(httpStatus.OK).send(booking);
   } catch (e) {
     next(e);
@@ -35,6 +37,7 @@ export async function updateBooking(req: AuthenticatedRequest, res: Response, ne
 
     return res.send(httpStatus.OK).send(bookingUpdated);
   } catch (e) {
+    console.log(e);
     next(e);
   }
 }
