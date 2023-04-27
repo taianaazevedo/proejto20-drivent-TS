@@ -47,11 +47,13 @@ async function updateBooking(userId: number, bookingId: string, roomId: number) 
 
   const updateCapacityFromNewRoom = room.capacity - 1;
 
+  const updatedRoom = await bookingRepository.updateBooking(roomId, booking_id, userId);
+
   await bookingRepository.updateCapacityFromRoom(roomId, updateCapacityFromNewRoom);
 
   await bookingRepository.updateCapacityFromRoom(userBooking.Room.id, updateCapacityFromOldRoom);
 
-  return await bookingRepository.updateBooking(roomId, booking_id, userId);
+  return updatedRoom;
 }
 
 const bookingService = {
