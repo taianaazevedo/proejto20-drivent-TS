@@ -9,6 +9,14 @@ async function findRoomById(roomId: number): Promise<Room> {
   });
 }
 
+async function countBookingsFromRoom(roomId: number) {
+  return await prisma.booking.count({
+    where: {
+      roomId,
+    },
+  });
+}
+
 async function getBooking(userId: number): Promise<{ Room: Room; id: number }> {
   return await prisma.booking.findFirst({
     where: {
@@ -60,6 +68,7 @@ async function updateBooking(roomId: number, bookingId: number, userId: number) 
 const bookingRepository = {
   findRoomById,
   updateCapacityFromRoom,
+  countBookingsFromRoom,
   getBooking,
   postBooking,
   updateBooking,

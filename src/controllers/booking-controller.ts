@@ -20,6 +20,7 @@ export async function postBooking(req: AuthenticatedRequest, res: Response, next
   const { userId } = req;
   const { roomId } = req.body;
   try {
+    if (!roomId) return res.status(httpStatus.BAD_REQUEST);
     const idBooking = await bookingService.postBooking(userId, parseInt(roomId));
 
     return res.status(httpStatus.OK).send({ bookingId: idBooking });
@@ -33,6 +34,9 @@ export async function updateBooking(req: AuthenticatedRequest, res: Response, ne
   const { bookingId } = req.params;
   const { roomId } = req.body;
   try {
+    if (!roomId) return res.status(httpStatus.BAD_REQUEST);
+    if (!bookingId) return res.status(httpStatus.BAD_REQUEST);
+
     const bookingUpdated = await bookingService.updateBooking(userId, bookingId, parseInt(roomId));
 
     return res.status(httpStatus.OK).send({ bookingId: bookingUpdated });

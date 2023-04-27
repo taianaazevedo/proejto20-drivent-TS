@@ -7,7 +7,9 @@ async function verifyAvailabilityFromRooms(roomId: number) {
 
   if (!room) throw notFoundError();
 
-  if (Number(room.capacity) === 0) throw cannotBookingError();
+  const qntyOfBookings = await bookingRepository.countBookingsFromRoom(roomId);
+
+  if (qntyOfBookings > room.capacity) throw cannotBookingError();
 
   return room;
 }
