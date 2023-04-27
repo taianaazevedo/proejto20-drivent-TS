@@ -25,21 +25,23 @@ async function postBooking(userId: number, roomId: number) {
 
   const room = await verifyAvailabilityFromRooms(roomId);
 
+  const booking = await bookingRepository.postBooking(userId, roomId);
+
   const updateCapacity = room.capacity - 1;
 
   await bookingRepository.updateCapacityFromRoom(roomId, updateCapacity);
 
-  return await bookingRepository.postBooking(userId, roomId);
+  return booking;
 }
 
 async function updateBooking(userId: number, bookingId: string, roomId: number) {
   const booking_id = Number(bookingId);
 
+  const room = await verifyAvailabilityFromRooms(roomId);
+
   const userBooking = await bookingRepository.getBooking(userId);
 
   if (!userBooking) throw cannotBookingError();
-
-  const room = await verifyAvailabilityFromRooms(roomId);
 
   const updateCapacityFromOldRoom = userBooking.Room.capacity + 1;
 

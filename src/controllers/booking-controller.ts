@@ -20,9 +20,9 @@ export async function postBooking(req: AuthenticatedRequest, res: Response, next
   const { userId } = req;
   const { roomId } = req.body;
   try {
-    const bookingId = await bookingService.postBooking(userId, parseInt(roomId));
+    const idBooking = await bookingService.postBooking(userId, parseInt(roomId));
 
-    return res.send(httpStatus.OK).send(bookingId);
+    return res.status(httpStatus.OK).send({ bookingId: idBooking });
   } catch (e) {
     next(e);
   }
@@ -35,7 +35,7 @@ export async function updateBooking(req: AuthenticatedRequest, res: Response, ne
   try {
     const bookingUpdated = await bookingService.updateBooking(userId, bookingId, roomId);
 
-    return res.send(httpStatus.OK).send(bookingUpdated);
+    return res.status(httpStatus.OK).send(bookingUpdated);
   } catch (e) {
     console.log(e);
     next(e);
