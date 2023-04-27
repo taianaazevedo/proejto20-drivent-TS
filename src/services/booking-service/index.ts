@@ -7,7 +7,7 @@ async function verifyAvailabilityFromRooms(roomId: number) {
 
   if (!room) throw notFoundError();
 
-  if (room.capacity <= 0) throw cannotBookingError();
+  if (Number(room.capacity) === 0) throw cannotBookingError();
 
   return room;
 }
