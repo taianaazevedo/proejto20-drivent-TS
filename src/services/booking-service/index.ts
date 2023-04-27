@@ -49,7 +49,7 @@ async function updateBooking(userId: number, bookingId: string, roomId: number) 
 
   await bookingRepository.updateCapacityFromRoom(roomId, updateCapacityFromNewRoom);
 
-  return await bookingRepository.updateBooking(roomId, booking_id);
+  return await bookingRepository.updateBooking(roomId, booking_id, userId);
 }
 
 const bookingService = {

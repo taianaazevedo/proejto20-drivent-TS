@@ -42,13 +42,14 @@ async function updateCapacityFromRoom(roomId: number, updateCapacity: number) {
   });
 }
 
-async function updateBooking(roomId: number, bookingId: number) {
+async function updateBooking(roomId: number, bookingId: number, userId: number) {
   const update = await prisma.booking.update({
     where: {
       id: bookingId,
     },
     data: {
       roomId,
+      userId,
     },
   });
 
