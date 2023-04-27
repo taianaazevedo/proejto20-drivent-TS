@@ -9,7 +9,7 @@ async function verifyAvailabilityFromRooms(roomId: number) {
 
   const qntyOfBookings = await bookingRepository.countBookingsFromRoom(roomId);
 
-  if (qntyOfBookings > room.capacity) throw cannotBookingError();
+  if (qntyOfBookings >= room.capacity) throw cannotBookingError();
 
   return room;
 }
