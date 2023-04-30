@@ -9,7 +9,7 @@ async function findRoomById(roomId: number): Promise<Room> {
   });
 }
 
-async function countBookingsFromRoom(roomId: number) {
+async function countBookingsFromRoom(roomId: number): Promise<number> {
   return await prisma.booking.count({
     where: {
       roomId,
@@ -29,7 +29,7 @@ async function getBooking(userId: number): Promise<{ Room: Room; id: number }> {
   });
 }
 
-async function postBooking(userId: number, roomId: number) {
+async function postBooking(userId: number, roomId: number): Promise<number> {
   const booking = await prisma.booking.create({
     data: {
       userId,
@@ -40,7 +40,7 @@ async function postBooking(userId: number, roomId: number) {
   return booking.id;
 }
 
-async function updateBooking(roomId: number, bookingId: number, userId: number) {
+async function updateBooking(roomId: number, bookingId: number, userId: number): Promise<number> {
   const update = await prisma.booking.update({
     where: {
       id: bookingId,

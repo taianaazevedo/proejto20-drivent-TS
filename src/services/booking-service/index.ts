@@ -1,8 +1,9 @@
+import { Room } from '@prisma/client';
 import hotelsService from '../hotels-service';
 import { cannotBookingError, notFoundError } from '@/errors';
 import bookingRepository from '@/repositories/booking-repository';
 
-async function verifyAvailabilityFromRooms(roomId: number) {
+async function verifyAvailabilityFromRooms(roomId: number): Promise<Room> {
   const room = await bookingRepository.findRoomById(roomId);
 
   if (!room) throw notFoundError();
@@ -14,7 +15,10 @@ async function verifyAvailabilityFromRooms(roomId: number) {
   return room;
 }
 
-async function getBooking(userId: number) {
+async function getBooking(userId: number): Promise<{
+  Room: Room;
+  id: number;
+}> {
   const booking = await bookingRepository.getBooking(userId);
 
   if (!booking) throw notFoundError();
@@ -22,7 +26,7 @@ async function getBooking(userId: number) {
   return booking;
 }
 
-async function postBooking(userId: number, roomId: number) {
+async function postBooking(userId: number, roomId: number): Promise<number> {
   await hotelsService.verifyTicketAndPaymentFromUser(userId);
 
   await verifyAvailabilityFromRooms(roomId);
@@ -30,7 +34,7 @@ async function postBooking(userId: number, roomId: number) {
   return await bookingRepository.postBooking(userId, roomId);
 }
 
-async function updateBooking(userId: number, bookingId: string, roomId: number) {
+async function updateBooking(userId: number, bookingId: string, roomId: number): Promise<number> {
   const booking_id = Number(bookingId);
 
   await verifyAvailabilityFromRooms(roomId);
