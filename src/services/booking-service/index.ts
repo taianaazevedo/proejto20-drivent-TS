@@ -2,6 +2,8 @@ import { Room } from '@prisma/client';
 import hotelsService from '../hotels-service';
 import { cannotBookingError, notFoundError } from '@/errors';
 import bookingRepository from '@/repositories/booking-repository';
+import enrollmentRepository from '@/repositories/enrollment-repository';
+import ticketsRepository from '@/repositories/tickets-repository';
 
 async function verifyAvailabilityFromRooms(roomId: number): Promise<Room> {
   const room = await bookingRepository.findRoomById(roomId);
@@ -13,6 +15,21 @@ async function verifyAvailabilityFromRooms(roomId: number): Promise<Room> {
   if (qntyOfBookings >= room.capacity) throw cannotBookingError();
 
   return room;
+}
+
+async function verifyTicketAndPaymentFromUser(userId: number) {
+  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+
+  if (!enrollment) throw notFoundError();
+
+  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
+
+  if (!ticket) throw notFoundError();
+
+  if (ticket.status !== 'PAID' || ticket.TicketType.includesHotel === false || ticket.TicketType.isRemote === true)
+    throw cannotBookingError();
+
+  return [enrollment, ticket];
 }
 
 async function getBooking(userId: number): Promise<{
@@ -27,7 +44,7 @@ async function getBooking(userId: number): Promise<{
 }
 
 async function postBooking(userId: number, roomId: number): Promise<number> {
-  await hotelsService.verifyTicketAndPaymentFromUser(userId);
+  await verifyTicketAndPaymentFromUser(userId);
 
   await verifyAvailabilityFromRooms(roomId);
 
